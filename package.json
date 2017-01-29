@@ -1,0 +1,22 @@
+{
+  "name": "signbot-hear",
+  "version": "1.0.0",
+  "description": "Translates speech to text to ASL signs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toastify/signbot-hear.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toastify/signbot-hear/issues"
+  },
+  "homepage": "https://github.com/toastify/signbot-hear#readme",
+  "dependencies": {
+    "dotenv-safe": "^4.0.3"
+  }
+}
