@@ -1,0 +1,227 @@
+<!--Copyright © 2016 Nuance Communications, Inc. All rights reserved.-->
+<!--Published by Nuance Communications, Inc.-->
+<!--One Wayside Road, Burlington, Massachusetts 01803, U.S.A.-->
+
+<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <title>Nuance Websockets JS Sample</title>
+
+    <!--  LIBRARY DEPS -->
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <link href='lib/font-awesome.min.css' rel="stylesheet">
+    <link href='styles/style.css' rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans" rel="stylesheet" type="text/css">
+
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+
+    <!--  WEB SDK DEPS -->
+    <script src='lib/resampler.js'></script>
+    <script src='lib/speex.js'></script>
+    <script src='lib/nuance.js'></script>
+</head>
+<body>
+    <button id='asr_go' type='button' class='btn btn-primary btn-block' style="width:50%;margin-left: auto;margin-right:auto;">
+        <i class='fa fa-microphone'></i> <span id='asr_label'>RECORD</span>
+    </button>
+
+    <div id="error">
+        <h2>You <u>must</u> access this webapp through a <u>web server</u>.</h2>
+        <br/>
+        <div class="notice">
+            <p>Convenient methods to launch a web server for use:</p>
+            <ul style="list-style-type:square;">
+                <li>
+                    <code>python -m SimpleHTTPServer 8000</code> (Python 2.x)
+                </li>
+                <li>
+                    <code>python -m http.server --cgi 8000</code> (Python 3.x)
+                </li>
+            </ul>
+            <p>Then navigate to a browser -><code>http://localhost:8000</code>
+        </div>
+    </div>
+
+    <div id="content" class='container' style="display: none">
+        <!--  HEADER -->
+        <h1 class='page-header'>
+            <img style="margin-left: 25px;" src="images/NMIX.png" width="220px"> Runtime Execution Console
+        </h1>
+
+        <div class='' style='min-height:400px;padding:0px;'>
+
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+                <li role="presentation" class="active"><a role="tab" data-toggle="tab" href="#credentials"><i class='fa fa-key'></i> Credentials & Settings</a></li>
+                <li role="presentation"><a role="tab" data-toggle="tab" href="#text-nlu">① Text NLU</a> <div class='status-indicator'>&nbsp;</div></li>
+                <li role="presentation"><a role="tab" data-toggle="tab" href="#speech-nlu">② Speech Recognition (w/ NLU)</a> <div class='status-indicator'>&nbsp;</div></li>
+                <li role="presentation"><a role="tab" data-toggle="tab" href="#text-to-speech">③ Text To Speech</a> <div class='status-indicator'>&nbsp;</div></li>
+                <li role="presentation"><a role="tab" data-toggle="tab" href="#logs"><i class='fa fa-database'></i> Logs</a></li>
+            </ul>
+
+            <div class="tab-content">
+
+                <!--  CREDENTIALS -->
+                <div id="credentials" role="tabpanel" class='col-md-12 tab-pane fade in active'>
+                    <div class='panel panel-default'>
+                        <div class='panel-heading'>
+                            <strong>Connection Parameters</strong>
+                            <div class="pull-right">
+                                <a href="javascript:void(0);" id="show-hide-credentials" class="show-hide">Hide</a>
+                            </div>
+                        </div>
+                        <div class='panel-body' id="credentials-view">
+                            <form class='form' role='form' onsubmit="return false;">
+                                <div class='form-group'>
+                                    <label>WebSockets Hostname</label>
+                                    <input id="url" type="text" class="form-control" placeholder="URL" value="wss://ws.dev.nuance.com/?" disabled/>
+                                </div>
+                                <hr/>
+                                <div class='form-group'>
+                                    <label>App ID</label>
+                                    <input id="app_id" type="text" class="form-control" placeholder="AppId"/>
+                                    <p class="help-block">The Application's ID. Formerly known as the NMAID (Nuance Mobile Application ID).</p>
+                                </div>
+                                <div class='form-group'>
+                                    <label>App Key</label>
+                                    <input id="app_key" type="text" class="form-control" placeholder="AppKey"/>
+                                    <p class="help-block">The Application's Key associated with the App ID; a 128 byte string.</p>
+                                </div>
+                                <hr/>
+                                <div class='form-group'>
+                                    <label>User ID (①, ②, ③)</label>
+                                    <input id="user_id" type="text" class="form-control" placeholder="UserId"/>
+                                    <p class="help-block">The user id is associated to an adapting acoustic profile. Change this when different speakers are executing transactions.</p>
+                                </div>
+                                <hr/>
+                                <div class="row">
+                                    <div class='form-group col-md-6'>
+                                        <label>Language (①, ②, ③)</label>
+                                        <select class='form-control' id="language">
+                                            <option value="eng-USA">English US (eng-USA)</option>
+                                            <option value="eng-GBR">English GB (eng-GBR)</option>
+                                            <option value="eng-AUS">English AUS (eng-AUS)</option>
+                                            <option value="nld-NLD">Dutch (nld-NLD)</option>
+                                            <option value="fra-CAN">French Canadian (fra-CAN)</option>
+                                            <option value="fra-FRA">French France (fra-FRA)</option>
+                                            <option value="deu-DEU">German (deu-DEU)</option>
+                                            <option value="ita-ITA">Italian (ita-ITA)</option>
+                                            <option value="jpn-JPN">Japanese (jpn-JPN)</option>
+                                            <option value="kor-KOR">Korean (kor-KOR)</option>
+                                            <option value="cmn-CHN">Mandarin Chinese, Simplified (cmn-CHN)</option>
+                                            <option value="por-PRT">Portuguese (por-PRT)</option>
+                                            <option value="por-BRA">Portuguese Brazil (por-BRA)</option>
+                                            <option value="spa-ESP">Spanish (spa-ESP)</option>
+                                            <option value="swe-SWE">Swedish (swe-SWE)</option>
+                                        </select>
+                                        <p class="help-block">Select the language to execute transactions with.</p>
+                                    </div>
+                                    <div class='form-group col-md-6'>
+                                        <label>Mix.nlu Context Tag (①, ②)</label>
+                                        <input id="nlu_tag" type="text" class="form-control" placeholder="Context Tag"/>
+                                        <p class="help-block">The context tag to execute transactions with against a configured Mix.nlu model version.</p>
+                                    </div>
+                                    <div class='btn-block'>
+                                        <button id='save_creds' type='button' class='btn btn-primary col-xs-6'>SAVE</button>
+                                        <button id='reset_creds' type='button' class='btn btn-warning col-xs-6'>RESET</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--  TEXT NLU -->
+                <div role="tabpanel" id="text-nlu" class="col-md-12 tab-pane fade">
+                    <div id="nlu" class='panel panel-default'>
+                        <div class="panel-heading">
+                            <strong>Interpret Text using a Mix.nlu Natural Language Model (using the Context Tag defined)</strong>
+                        </div>
+                        <div class="panel-body">
+                            <form class='form' role='form' onsubmit="$('#nlu_go').click();return false;">
+                                <div class="input-group">
+                                    <input id="nlu_text" type="text" class="form-control" placeholder="Text to process"/>
+                                    <span class="input-group-btn">
+                                        <button id='nlu_go' type='button' class='btn btn-primary btn-block'>
+                                            <span id='nlu_label'>INTERPRET</span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                        <div id="nlu_debug_output" class="panel-body"></div>
+                    </div>
+                </div>
+
+                <!--  ASR / NLU -->
+                <div role="tabpanel" id="speech-nlu" class='col-md-12 tab-pane fade'>
+                    <div id="asr" class='panel panel-default'>
+                        <div class='panel-heading'>
+                            <strong>Speech Recognition with Natural Language Understanding (optional, using the Context Tag defined)</strong>
+                        </div>
+                        <div class='panel-body'>
+                            <div class="checkbox">
+                                <label>
+                                    <input id="use_nlu" type="checkbox" checked/> Enable Natural Language Understanding (+ Speech Recognition Customization)
+                                </label>
+                            </div>
+                            <canvas id="asr_viz" height="220" ></canvas>
+                            <br/>
+                        </div>
+                        <div id='asr_debug_output' class='panel-body' ></div>
+                    </div>
+                </div>
+
+                <!--  TTS -->
+                <div role="tabpanel" id="text-to-speech" class='col-md-12 tab-pane fade'>
+                    <div id="tts" class='panel panel-default'>
+                        <div class='panel-heading'>
+                            <strong>Produce Audio and Convert Text to Speech</strong>
+                        </div>
+                        <div class='panel-body'>
+                            <form class='form' role='form' onsubmit="$('#tts_go').click();return false;">
+                                <div class='form-group'>
+                                    <textarea id="tts_text" class='form-control textarea' placeholder='Text to synthesize' rows='12'></textarea>
+                                </div>
+                                <div class='form-group'>
+                                    <button id='tts_go' type='button' class='btn btn-primary btn-block'>
+                                        <i class='fa fa-comment'></i> SPEAK
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div id='tts_debug_output' class='panel-body'></div>
+                    </div>
+                </div>
+
+                <!-- Logs -->
+                <div role="tabpanel" id="logs" class="col-md-12 tab-pane fade">
+                    <div class='panel panel-default'>
+                        <div class="panel-heading">
+                            <strong>JSON (Non-Binary) Raw Websockets Messages</strong>
+                        </div>
+                        <div id="logs_output" class="panel-body min-400"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <hr/>
+
+        <!--  FOOTER -->
+        <footer class='col-md-12 right-aligned'>
+            &copy; Nuance Communications 2016 | <a href="mailto:developerrelations@nuance.com"> <i class='fa fa-question'></i> Contact The Developer Relations Team</a>
+        </footer>
+
+    </div>
+
+    <!--  APPLICATION -->
+
+    <script src='configuration.js'></script>
+    <script src='app.js'></script>
+
+</body>
+</html>
