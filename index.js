@@ -30,13 +30,13 @@ app.all('/talk', (req, res) => {
     if(!interval)
       interval = setInterval(function(){
         if(queue.length){
-          let to_say = queue.shift();
+          let to_say = queue.shift().toLowerCase();
           while(!samples[to_say] && queue.length)
             to_say = queue.shift();
           if(samples[to_say])
-            talker.send(to_say.toLowerCase());
+            talker.send(samples[to_say]);
         }else{
-          talker.send('null');
+          talker.send(samples['null']);
           clearInterval(interval);
           interval = undefined;
         }
