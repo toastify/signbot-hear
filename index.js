@@ -16,7 +16,30 @@ let qs = require('querystring').stringify({
 });
 
 let queue = [];
-let interval;
+let processing = false;
+
+function processPositionQueue(){
+  processing = true;
+  if(queue.length){
+    let to_move = queue.shift();
+    if(to_move){
+      if(to_move[0]){
+        queue = to_move.concat(queue);
+        processPositionQueue();
+      }
+      else{
+        talker.send(to_move);
+        setTimeout(processPositionQueue, to_move.time || 3000);
+      }
+    }
+    else{
+      processPositionQueue();
+    }
+  }else{
+    talker.send(samples['null']);
+    processing = false;
+  }
+}
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -24,24 +47,11 @@ let app = express();
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/html'));
 app.all('/talk', (req, res) => {
-  if(req.body.transcriptions){
-    console.log(req.body.transcriptions[0]);
-    queue[queue.length] = req.body.transcriptions[0];
-    if(!interval)
-      interval = setInterval(function(){
-        if(queue.length){
-          let to_say = queue.shift().toLowerCase();
-          while(!samples[to_say] && queue.length)
-            to_say = queue.shift();
-          if(samples[to_say])
-            talker.send(samples[to_say]);
-        }else{
-          talker.send(samples['null']);
-          clearInterval(interval);
-          interval = undefined;
-        }
-      }, 1500);
-  }
+    if(req.body.transcriptions){
+      console.log(req.body.transcriptions[0]);
+      queue[queue.length] = samples[req.body.transcriptions[0].toLowerCase()];
+      if(!processing)processPositionQueue();
+    }
 
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8022');
