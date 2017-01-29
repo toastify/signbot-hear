@@ -19,6 +19,7 @@ let queue = [];
 let processing = false;
 
 function processPositionQueue(){
+  console.log(queue);
   processing = true;
   if(queue.length){
     let to_move = queue.shift();
@@ -49,7 +50,7 @@ app.use(express.static(__dirname + '/html'));
 app.all('/talk', (req, res) => {
     if(req.body.transcriptions){
       console.log(req.body.transcriptions[0]);
-      queue[queue.length] = samples[req.body.transcriptions[0].toLowerCase()];
+      queue = queue.concat(req.body.transcriptions[0].split(' ').map(x=>samples[x]));
       if(!processing)processPositionQueue();
     }
 
